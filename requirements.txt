@@ -1,0 +1,5 @@
+discord
+asyncio
+python-dotenv
+pypubsub
+meshtastic
