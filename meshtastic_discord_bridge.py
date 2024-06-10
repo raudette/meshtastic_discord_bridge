@@ -101,19 +101,28 @@ class MyClient(discord.Client):
                 nodes=iface.nodes
                 for node in nodes:
                     try:
-                            id = nodes[node]['user']['id']
-                            num = nodes[node]['num']
-                            longname = nodes[node]['user']['longName']
+                            id = str(nodes[node]['user']['id'])
+                            num = str(nodes[node]['num'])
+                            longname = str(nodes[node]['user']['longName'])
                             if "hopsAway" in nodes[node]:
-                                hopsaway = nodes[node]['hopsAway']
+                                hopsaway = str(nodes[node]['hopsAway'])
                             else:
-                                hopsaway=0
-                            snr = nodes[node]['snr']
-                            ts=int(nodes[node]['lastHeard'])
-                            timestr = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                                hopsaway="0"
+                            if "snr" in nodes[node]:
+                                snr = str(nodes[node]['snr'])
+                            else:
+                                snr="?"
+                            if "lastHeard" in nodes[node]:
+                                ts=int(nodes[node]['lastHeard'])
+                                timestr = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                            else:
+                                #Just make it old so it doesn't show, only interested in nodes we know are active
+                                ts=time.time()-(16*60)
+                                timestr="Unknown"
                             if ts>time.time()-(15*60):
-                                nodelist=nodelist+"\nid:"+id + ", num:"+str(num)+", longname:" + longname + ", hops:" + str(hopsaway) + ", snr:"+str(snr)+", lastheardutc:"+timestr 
-                    except KeyError:
+                                nodelist=nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr 
+                    except KeyError as e:
+                        print(e)
                         pass
             try:
                 meshmessage=meshtodiscord.get_nowait()
