@@ -95,6 +95,7 @@ class MyClient(discord.Client):
             sys.exit(1)
         while not self.is_closed():
             counter += 1
+            print(counter)
             if (counter%12==1):
                 #approx 1 minute (every 12th call, call every 5 seconds), refresh node list
                 nodelist="Nodes seen in the last 15 minutes\n"
@@ -119,8 +120,12 @@ class MyClient(discord.Client):
                                 #Just make it old so it doesn't show, only interested in nodes we know are active
                                 ts=time.time()-(16*60)
                                 timestr="Unknown"
-                            if ts>time.time()-(15*60):
+                            #if ts>time.time()-(15*60):
+                            if len(nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr )<1900:
                                 nodelist=nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr 
+                            else:
+                                print("Nodelist exceeds 1900 characters.... cutting at 1900")
+                            print(nodelist)
                     except KeyError as e:
                         print(e)
                         pass
