@@ -14,6 +14,8 @@ Get a Discord Bot account and invite the bot to a server.  [Instructions](https:
 
 Fill in the values for your environment in sampledotenvfile, and rename to .env 
 
+If you connect to your mesh device via TCP, specify the hostname in MESHTASTIC_HOSTNAME.  If no hostname is specified, a serial interface is assumed.
+
 ```
 python3 -m pip install -r requirements.txt
 python meshtastic_discord_bridge.py

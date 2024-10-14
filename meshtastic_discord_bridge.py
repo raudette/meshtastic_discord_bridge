@@ -5,6 +5,7 @@ import sys
 from dotenv import load_dotenv
 from pubsub import pub
 import meshtastic
+import meshtastic.tcp_interface
 import meshtastic.serial_interface
 import queue
 import time
@@ -13,6 +14,7 @@ from datetime import datetime
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 channel_id = int(os.getenv("DISCORD_CHANNEL_ID"))
+meshtastic_hostname = os.getenv("MESHTASTIC_HOSTNAME")
 
 meshtodiscord = queue.Queue()
 discordtomesh = queue.Queue()
@@ -89,7 +91,12 @@ class MyClient(discord.Client):
         pub.subscribe(onReceiveMesh, "meshtastic.receive")
         pub.subscribe(onConnectionMesh, "meshtastic.connection.established")
         try:
-            iface =  meshtastic.serial_interface.SerialInterface()
+            if len(meshtastic_hostname)>1:
+                print("Trying TCP interface to "+meshtastic_hostname)
+                iface = meshtastic.tcp_interface.TCPInterface(meshtastic_hostname)
+            else:
+                print("Trying serial interface")
+                iface =  meshtastic.serial_interface.SerialInterface()
         except Exception as ex:
             print(f"Error: Could not connect {ex}")
             sys.exit(1)

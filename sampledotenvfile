@@ -1,2 +1,5 @@
 DISCORD_TOKEN=""
 DISCORD_CHANNEL_ID=""
+#If you are connecting to your mesh device by IP/hostname, enter the hostname here
+#If not, a serial interface is assumed
+MESHTASTIC_HOSTNAME=""
