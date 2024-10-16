@@ -2,6 +2,7 @@ import discord
 import asyncio
 import os
 import sys
+import io
 from dotenv import load_dotenv
 from pubsub import pub
 import meshtastic
@@ -105,7 +106,7 @@ class MyClient(discord.Client):
             print(counter)
             if (counter%12==1):
                 #approx 1 minute (every 12th call, call every 5 seconds), refresh node list
-                nodelist="Nodes seen in the last 15 minutes\n"
+                nodelist="Node list:\n"
                 nodes=iface.nodes
                 for node in nodes:
                     try:
@@ -125,13 +126,10 @@ class MyClient(discord.Client):
                                 timestr = datetime.utcfromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
                             else:
                                 #Just make it old so it doesn't show, only interested in nodes we know are active
-                                ts=time.time()-(16*60)
+                                #Use this if you want to assign a time in the past: ts=time.time()-(16*60)
                                 timestr="Unknown"
-                            #if ts>time.time()-(15*60):
-                            if len(nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr )<1900:
-                                nodelist=nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr 
-                            else:
-                                print("Nodelist exceeds 1900 characters.... cutting at 1900")
+                            #Use this if you want to filter on time: if ts>time.time()-(15*60):
+                            nodelist=nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr 
                             print(nodelist)
                     except KeyError as e:
                         print(e)
@@ -155,7 +153,15 @@ class MyClient(discord.Client):
             try:
                 nodelistq.get_nowait()
                 #if there's any item on this queue, we'll send the nodelist
-                await channel.send(nodelist)
+                lines=nodelist.splitlines()
+                packet=""
+                for index,line in enumerate(lines):
+                    if len(packet)+len(line) < 1900:
+                        packet=packet+line+"\n"
+                    else:
+                        await channel.send(packet)
+                        packet=line+"\n"
+                await channel.send(packet)
                 nodelistq.task_done()
             except queue.Empty:
                 pass
