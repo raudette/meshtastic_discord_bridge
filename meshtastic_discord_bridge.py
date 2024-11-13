@@ -102,6 +102,7 @@ class MyClient(discord.Client):
             print(f"Error: Could not connect {ex}")
             sys.exit(1)
         while not self.is_closed():
+            time.sleep(0.5)
             counter += 1
             print(counter)
             if (counter%12==1):
