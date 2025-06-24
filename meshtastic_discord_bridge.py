@@ -27,12 +27,16 @@ def onConnectionMesh(interface, topic=pub.AUTO_TOPIC):
 
 def onReceiveMesh(packet, interface):  
     """called when a packet arrives from mesh"""
-    try: 
-        if packet['decoded']['portnum']=='TEXT_MESSAGE_APP': #only interest in text packets for now
-            meshtodiscord.put("Node "+packet['fromId']+" writes to node "+packet['toId']+ " this message: " +packet['decoded']['text'])
-    except KeyError as e: #catch empty packet
-        pass
-
+    try:
+        if 'decoded' in packet: 
+            if packet['decoded']['portnum']=='TEXT_MESSAGE_APP': #only interest in text packets for now
+                meshtodiscord.put("Node "+packet['fromId']+" writes to node "+packet['toId']+ " this message: " +packet['decoded']['text'])
+#    App was occasionally failing where packet['fromId'] was nonetype, let's see if catching all exceptions helps
+#    except KeyError as e: #catch empty packet
+#        pass
+    except Exception as e:
+        print("On receive mesh exception: " + str(e))
+        
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -103,7 +107,8 @@ class MyClient(discord.Client):
             sys.exit(1)
         while not self.is_closed():
             counter += 1
-            print(counter)
+            #Helpful to uncomment this print counter if you need to know if this task is still running
+            #print(counter)
             if (counter%12==1):
                 #approx 1 minute (every 12th call, call every 5 seconds), refresh node list
                 nodelist="Node list:\n"
@@ -130,7 +135,6 @@ class MyClient(discord.Client):
                                 timestr="Unknown"
                             #Use this if you want to filter on time: if ts>time.time()-(15*60):
                             nodelist=nodelist+"\nid:"+id + ", num:"+num+", longname:" + longname + ", hops:" + hopsaway + ", snr:"+snr+", lastheardutc:"+timestr 
-                            print(nodelist)
                     except KeyError as e:
                         print(e)
                         pass
